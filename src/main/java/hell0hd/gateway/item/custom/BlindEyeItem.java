@@ -1,0 +1,116 @@
+package hell0hd.gateway.item.custom;
+
+import hell0hd.gateway.block.ModBlocks;
+import hell0hd.gateway.block.custom.ReinforcedDeepslateFrameBlock;
+import hell0hd.gateway.item.ModItems;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.item.EnderEyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EndPortalFrameBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+public class BlindEyeItem extends EnderEyeItem {
+    public BlindEyeItem(Properties properties) {
+        super(properties);
+    }
+
+    @Override
+    public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+        BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
+        if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(hitResult.getBlockPos()).is(ModBlocks.REINFORCED_DEEPSLATE_FRAME)) {
+            return InteractionResult.PASS;
+        } else {
+            player.startUsingItem(hand);
+            if (level instanceof ServerLevel) {
+                ServerLevel serverLevel = (ServerLevel)level;
+                BlockPos nearestMapFeature = serverLevel.findNearestMapStructure(StructureTags.EYE_OF_ENDER_LOCATED, player.blockPosition(), 100, false);
+                if (nearestMapFeature == null) {
+                    return InteractionResult.CONSUME;
+                }
+
+                EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY((double)0.5F), player.getZ());
+                eyeOfEnder.setItem(itemStack);
+                eyeOfEnder.signalTo(Vec3.atLowerCornerOf(nearestMapFeature));
+                level.gameEvent(GameEvent.PROJECTILE_SHOOT, eyeOfEnder.position(), GameEvent.Context.of(player));
+                level.addFreshEntity(eyeOfEnder);
+                if (player instanceof ServerPlayer) {
+                    ServerPlayer serverPlayer = (ServerPlayer)player;
+                    CriteriaTriggers.USED_ENDER_EYE.trigger(serverPlayer, nearestMapFeature);
+                }
+
+                float pitch = Mth.lerp(level.getRandom().nextFloat(), 0.33F, 0.5F);
+                level.playSound((Entity)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 1.0F, pitch);
+                itemStack.consume(1, player);
+                player.awardStat(Stats.ITEM_USED.get(this));
+            }
+
+            return InteractionResult.SUCCESS_SERVER;
+        }
+    }
+
+    @Override
+    public InteractionResult useOn(final UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState targetState = level.getBlockState(pos);
+        if (targetState.is(ModBlocks.REINFORCED_DEEPSLATE_FRAME) && !(Boolean)targetState.getValue(ReinforcedDeepslateFrameBlock.HAS_EYE)) {
+            if (level.isClientSide()) {
+                return InteractionResult.SUCCESS;
+            } else {
+                {
+                    BlockState newState = (BlockState)targetState.setValue(ReinforcedDeepslateFrameBlock.HAS_EYE, true);
+                    Block.pushEntitiesUp(targetState, newState, level, pos);
+                    level.setBlock(pos, newState, 2);
+                    level.updateNeighbourForOutputSignal(pos, ModBlocks.REINFORCED_DEEPSLATE_FRAME);
+                    context.getItemInHand().shrink(1);
+                    level.levelEvent(1503, pos, 0);
+                    BlockPattern.BlockPatternMatch match = ReinforcedDeepslateFrameBlock.getOrCreatePortalShape(Direction.WEST).find(level, pos);
+                    if (match != null) {
+                        BlockPos blockPos = match.getFrontTopLeft().offset(6, 8, -13);
+
+
+                        for(int x = 0; x < 1; ++x) {
+                            for(int y= 0; y < 6; ++y) {
+                                for(int z = 0; z < 20; ++z) {
+                                    BlockPos portalBlockPos = blockPos.offset(x, y, z);
+                                    level.destroyBlock(portalBlockPos, true, (Entity)null);
+                                    level.setBlock(portalBlockPos, Blocks.DIRT.defaultBlockState(), 2);
+                                }
+                            }
+                        }
+                    }
+
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        } else {
+            return InteractionResult.PASS;
+        }
+    }
+}
