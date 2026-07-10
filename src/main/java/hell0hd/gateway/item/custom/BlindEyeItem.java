@@ -87,7 +87,8 @@ public class BlindEyeItem extends EnderEyeItem {
                     level.updateNeighbourForOutputSignal(pos, ModBlocks.REINFORCED_DEEPSLATE_FRAME);
                     context.getItemInHand().shrink(1);
                     level.levelEvent(1503, pos, 0);
-                    BlockPattern.BlockPatternMatch match = ReinforcedDeepslateFrameBlock.getOrCreatePortalShape(Direction.WEST).find(level, pos);
+                    Direction facing = targetState.getValue(ReinforcedDeepslateFrameBlock.FACING);
+                    BlockPattern.BlockPatternMatch match = ReinforcedDeepslateFrameBlock.getOrCreatePortalShape(facing).find(level, pos);
                     if (match != null) {
                         BlockPos blockPos = match.getFrontTopLeft().offset(6, 8, -13);
 

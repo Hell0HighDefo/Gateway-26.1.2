@@ -27,7 +27,9 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.Nullable;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 public class ReinforcedDeepslateFrameBlock extends Block {
     public static final MapCodec<ReinforcedDeepslateFrameBlock> CODEC = simpleCodec(ReinforcedDeepslateFrameBlock::new);
@@ -35,7 +37,7 @@ public class ReinforcedDeepslateFrameBlock extends Block {
     public static final BooleanProperty HAS_EYE;
     private static final VoxelShape SHAPE_EMPTY;
     private static final VoxelShape SHAPE_FULL;
-    private static @Nullable BlockPattern portalShape;
+    private static final Map<Direction, BlockPattern> portalShapes = new EnumMap<>(Direction.class);
 
     public MapCodec<ReinforcedDeepslateFrameBlock> codec() {
         return CODEC;
@@ -79,16 +81,7 @@ public class ReinforcedDeepslateFrameBlock extends Block {
     }
 
     public static BlockPattern getOrCreatePortalShape(Direction direction) {
-        if (portalShape == null) {
-            if (direction == Direction.WEST) {
-                portalShape = BlockPatternBuilder.start().aisle(new String[]{"?^?^?^?^?"}).where('?', BlockInWorld.hasState(BlockStatePredicate.ANY)).where('^', BlockInWorld.hasState(BlockStatePredicate.forBlock(ModBlocks.REINFORCED_DEEPSLATE_FRAME).where(HAS_EYE, Predicates.equalTo(true)).where(FACING, Predicates.equalTo(Direction.WEST)))).build();
-            }
-            if (direction == Direction.SOUTH) {
-                portalShape = BlockPatternBuilder.start().aisle(new String[]{"?<?<?<?<?"}).where('?', BlockInWorld.hasState(BlockStatePredicate.ANY)).where('<', BlockInWorld.hasState(BlockStatePredicate.forBlock(ModBlocks.REINFORCED_DEEPSLATE_FRAME).where(HAS_EYE, Predicates.equalTo(true)).where(FACING, Predicates.equalTo(Direction.SOUTH)))).build();
-            }
-        }
-
-        return portalShape;
+        return portalShapes.computeIfAbsent(direction, dir -> BlockPatternBuilder.start().aisle(new String[]{"?^?^?^?^?"}).where('?', BlockInWorld.hasState(BlockStatePredicate.ANY)).where('^', BlockInWorld.hasState(BlockStatePredicate.forBlock(ModBlocks.REINFORCED_DEEPSLATE_FRAME).where(HAS_EYE, Predicates.equalTo(true)).where(FACING, Predicates.equalTo(dir)))).build());
     }
 
     protected boolean isPathfindable(final BlockState state, final PathComputationType type) {
