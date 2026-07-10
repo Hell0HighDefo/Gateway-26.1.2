@@ -2,7 +2,6 @@ package hell0hd.gateway.item.custom;
 
 import hell0hd.gateway.block.ModBlocks;
 import hell0hd.gateway.block.custom.ReinforcedDeepslateFrameBlock;
-import hell0hd.gateway.item.ModItems;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,8 +24,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EndPortalFrameBlock;
-import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.gameevent.GameEvent;
