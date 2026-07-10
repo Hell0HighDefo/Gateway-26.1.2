@@ -1,5 +1,7 @@
 package hell0hd.gateway;
 
+import hell0hd.gateway.block.ModBlocks;
+import hell0hd.gateway.item.ModItems;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.resources.Identifier;
@@ -15,7 +17,8 @@ public class Gateway implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-
+		ModItems.registerModItems();
+		ModBlocks.registerModBlocks();
 
 		LOGGER.info("My code is load");
 	}
