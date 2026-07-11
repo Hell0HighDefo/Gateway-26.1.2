@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "gateway",
+	"version": "${version}",
+	"name": "Gateway",
+	"description": "A look into what's beyond.",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/gateway/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"hell0hd.gateway.Gateway"
+		],
+		"client": [
+			"hell0hd.gateway.client.GatewayClient"
+		],
+		"fabric-datagen": [
+			"hell0hd.gateway.client.GatewayDataGenerator"
+		]
+	},
+	"mixins": [
+		"gateway.mixins.json",
+		{
+			"config": "gateway.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

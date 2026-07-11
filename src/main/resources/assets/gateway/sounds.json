@@ -1,0 +1,15 @@
+{
+  "block.reinforced_deepslate_frame.fill": {
+    "sounds": [
+      "gateway:block/reinforced_deepslate_frame/eyeplace1",
+      "gateway:block/reinforced_deepslate_frame/eyeplace2",
+      "gateway:block/reinforced_deepslate_frame/eyeplace3"
+    ],
+    "subtitle": "subtitles.block.reinforced_deepslate_frame.fill"
+  },
+  "block.gateway.spawn": {
+    "sounds": [
+      "gateway:block/reinforced_deepslate_frame/gateway_shorter"
+    ]
+  }
+}
